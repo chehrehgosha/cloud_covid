@@ -14,19 +14,28 @@ import Summary from "./Summary";
 import PieChartCovid from "./PieChartCovid";
 import BarChartCovid from "./BarChartCovid";
 import LineChartCovid from "./LineChartCovid";
+import CovidCountryTable from "./CovidCountryTable";
 
 
 function HomePage({ history }) {
   const [loggedIn, setLoggedIn] = useState(false);
   const [covidSummary, setCovidSummary] = useState({});
   const [covidWorld, setCovidWorld] = useState([]);
+  const [lastSevenDays, setLastSevenDays] = useState({})
+  const [lastThirtyDays, setLastThirtyDays] = useState({})
+
 
   useEffect(async () => {
     try {
       const resSummary = await axios.get("https://api.covid19api.com/summary");
       setCovidSummary(resSummary.data);
-      const resWorld = await axios.get("https://api.covid19api.com/world");
-      setCovidWorld(resWorld.data);
+      const resSeven = await axios.get("https://corona.lmao.ninja/v2/historical/all?lastdays=8");
+      setLastSevenDays(resSeven.data);
+      const resThirty = await axios.get("https://corona.lmao.ninja/v2/historical/all");
+      setLastThirtyDays(resThirty.data)
+
+      // const resWorld = await axios.get("https://api.covid19api.com/world");
+      // setCovidWorld(resWorld.data);
     } catch (error) {
       console.log(error);
     }
@@ -40,22 +49,19 @@ function HomePage({ history }) {
           <PieChartCovid data={covidSummary["Global"]} />
         </Fragment>
       )}
-      {covidWorld.length > 7 && (
+      {lastSevenDays && (
         <Fragment>
-          <BarChartCovid data={covidWorld.slice(covidWorld.length - 7, covidWorld.length)}/>
-          <LineChartCovid data={covidWorld.slice().reverse()} length={covidWorld.length}/>
+          <BarChartCovid data={lastSevenDays}/>
+          <LineChartCovid data={lastThirtyDays}/>
         </Fragment>
       )}
-      <button
-        onClick={() =>
-          history.push({
-            pathname: "/country", 
-            state: "France",
-          })
-        }
-      >
-        Country
-      </button>
+      {
+        Object.keys(covidSummary).includes("Global") &&(
+          <Fragment>
+            <CovidCountryTable data={covidSummary['Countries']}/>
+          </Fragment>
+        )
+      }
       <Fab
         variant="extended"
         color="primary"

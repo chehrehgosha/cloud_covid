@@ -52,7 +52,7 @@ function App() {
         />
         <img
           src={title}
-          style={{  height: "50px", margin: "10px 10px 10px -10px" }}
+          style={{ height: "50px", margin: "10px 10px 10px -10px" }}
         />
       </div>
       <BrowserRouter>

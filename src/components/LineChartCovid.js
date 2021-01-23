@@ -9,25 +9,39 @@ import {
   Legend,
 } from "recharts";
 
-export default function LineChartCovid({ data, length }) {
+export default function LineChartCovid({ data }) {
   const [processedData, setProcessedData] = useState(null);
-  const mapper = (element, index) => {
-    const dat = new Date();
-    dat.setDate(dat.getDate()-(length-index))
-    return {
-      "Total Confirmed": element["TotalConfirmed"],
-      "Total Deaths": element["TotalDeaths"],
-      "Total Recovered": element["TotalRecovered"],
-      "name": dat.toString().slice(4,10)
-    };
-  };
   useEffect(() => {
-    if (data) {
-      const newData = data.map(mapper);
+    if (Object.keys(data).length > 0) {
+      // console.log(data);
+      const keys = Object.keys(data["cases"]);
+      const cases = Object.values(data["cases"]);
+      const deaths = Object.values(data["deaths"]);
+      const recovered = Object.values(data["recovered"]);
+      let newData = [];
+      let obj = {};
+      for (let index = 0; index < keys.length; index++) {
+        if (index === 0) {
+          obj = {
+            "Total Confirmed": cases[index],
+            "Total Deaths": deaths[index],
+            "Total Recovered": recovered[index],
+          };
+          // TotalData.push(obj)
+        } else {
+          obj = {
+            name: keys[index],
+            "Total Confirmed": cases[index],
+            "Total Deaths": deaths[index],
+            "Total Recovered": recovered[index],
+          };
+          newData.push(obj);
+        }
+      }
+      // const newData = data.map(mapper);
       setProcessedData(newData);
     }
   }, [data]);
-  console.log(processedData);
   return (
     <div>
       <LineChart
