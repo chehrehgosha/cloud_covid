@@ -8,7 +8,8 @@ import Country from "./components/Country";
 
 function App() {
   const firebaseApp = firebase.apps[0];
-  var storage = firebase.storage();
+  var storage = firebaseApp.storage();
+  
   const [png, setpng] = useState("");
   const [title, setTitle] = useState("initialState");
   var pathReference = storage.ref("");

@@ -15,9 +15,9 @@ export default function LineChartCovid({ data }) {
     if (Object.keys(data).length > 0) {
       // console.log(data);
       const keys = Object.keys(data["cases"]);
-      const cases = Object.values(data["cases"]);
-      const deaths = Object.values(data["deaths"]);
-      const recovered = Object.values(data["recovered"]);
+      const cases = Object.values(data["cases"]).sort();
+      const deaths = Object.values(data["deaths"]).sort();
+      const recovered = Object.values(data["recovered"]).sort();
       let newData = [];
       let obj = {};
       for (let index = 0; index < keys.length; index++) {
