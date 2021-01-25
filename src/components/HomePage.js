@@ -4,11 +4,16 @@ import Fab from "@material-ui/core/Fab";
 import { Redirect, withRouter } from "react-router-dom";
 import axios from "axios";
 import {
+  AppBar,
+  Button,
+  IconButton,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableRow,
+  Toolbar,
+  Typography,
 } from "@material-ui/core";
 import Summary from "./Summary";
 import PieChartCovid from "./PieChartCovid";
@@ -81,9 +86,58 @@ function HomePage({ history }) {
       console.log(error);
     }
   }, []);
+  const auth = firebase.auth();
+  const [user, setuser] = useState(auth.currentUser);
+  const googleProvider = new firebase.auth.GoogleAuthProvider();
+  const signInWithGoogle = () => {
+    auth
+      .signInWithPopup(googleProvider)
+      .then((res) => {
+        var userRef = db.collection("users").doc(res.user.email);
+        userRef.get().then(async (doc) => {
+          if (doc.exists) {
+            setuser(res.user);
+          } else {
+            auth.signOut();
+            // setuser(null);
+          }
+        });
+        console.log(res.user);
+      })
+      .catch((error) => {
+        console.log(error.message);
+      });
+  };
+  useEffect(() => {
+    setuser(auth.currentUser)
+  }, [auth.currentUser])
+
   // console.log(covidWorld.slice(covidWorld.length - 7, covidWorld.length))
   return (
-    <div>
+    <Fragment>
+      <AppBar position="static">
+        <Toolbar>
+          <Typography variant="h6" style={{ flexGrow: 1 }}>
+            Welcome {user ? user.displayName : "To Our Website"}
+          </Typography>
+          {!user && (
+            <Button color="inherit" onClick={signInWithGoogle}>
+              Login
+            </Button>
+          )}
+          {user && (
+            <Button
+              color="inherit"
+              onClick={() => {
+                auth.signOut().then(()=>console.log('signed out'));
+                setuser(null);
+              }}
+            >
+              Signout
+            </Button>
+          )}
+        </Toolbar>
+      </AppBar>
       {Object.keys(covidSummary).includes("Global") && (
         <Fragment>
           <Summary data={covidSummary["Global"]} />
@@ -101,14 +155,7 @@ function HomePage({ history }) {
           <CovidCountryTable data={covidSummary["Countries"]} />
         </Fragment>
       )}
-      <Fab
-        variant="extended"
-        color="primary"
-        style={{ position: "fixed", right: "30px", bottom: "30px" }}
-      >
-        {loggedIn ? "LOGOUT" : "LOG IN"}
-      </Fab>
-    </div>
+    </Fragment>
   );
 }
 

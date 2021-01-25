@@ -1,3 +1,4 @@
+import { Paper } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
 import {
   BarChart,
@@ -69,7 +70,16 @@ export default function BarChartCovid({ data }) {
   }, [data]);
   // console.log(processedData);
   return (
-    <div>
+    <Paper
+      elevation={2}
+      style={{
+        margin: "auto",
+        marginTop: "2%",
+        width: "90%",
+        paddingTop: "2%",
+        paddingBottom: "2%",
+      }}
+    >
       <BarChart
         style={{ margin: "auto" }}
         width={700}
@@ -91,6 +101,6 @@ export default function BarChartCovid({ data }) {
         <Bar dataKey="New Deaths" fill="#fc032d" />
         <Bar dataKey="New Recovered" fill="#13ed07" />
       </BarChart>
-    </div>
+    </Paper>
   );
 }

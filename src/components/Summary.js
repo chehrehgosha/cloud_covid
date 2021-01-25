@@ -11,7 +11,7 @@ import {
 export default function Summary({ data }) {
   return (
     <div>
-      <TableContainer component={Paper} style={{ margin: "20px" , width:'50%', margin:'auto'}}>
+      <TableContainer component={Paper} style={{ margin:'auto',marginTop: "2%" , width:'90%'}}>
         <Table aria-label="simple table">
           <TableBody>
             <TableRow>

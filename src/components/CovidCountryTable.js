@@ -56,7 +56,7 @@ export default function CovidCountryTable({ data }) {
   };
 
   return (
-    <div style={{ width: "100%" }}>
+    <Paper elevation={2}  style={{ margin:'auto',marginTop: "2%" , width:'90%'}} >
       {preparedData && (
         <TableContainer
           component={Paper}
@@ -120,6 +120,6 @@ export default function CovidCountryTable({ data }) {
           </Table>
         </TableContainer>
       )}
-    </div>
+    </Paper>
   );
 }

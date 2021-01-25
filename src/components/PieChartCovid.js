@@ -1,3 +1,4 @@
+import { Paper } from "@material-ui/core";
 import React, { useEffect, useState } from "react";
 import { RadialChart } from "react-vis";
 import { PieChart, Pie, Cell, Tooltip, Legend } from "recharts";
@@ -52,7 +53,7 @@ export default function PieChartCovid({ data }) {
     }
   }, [data]);
   return (
-    <div>
+    <Paper elevation={2}  style={{ margin:'auto',marginTop: "2%" , width:'90%'}} >
       {processedData && (
         <PieChart width={400} height={400} style={{ margin: "auto", marginTop:'30px' }}>
           <Pie
@@ -87,6 +88,6 @@ export default function PieChartCovid({ data }) {
           <Tooltip />
         </PieChart>
       )}
-    </div>
+    </Paper>
   );
 }

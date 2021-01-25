@@ -1,3 +1,4 @@
+import { Paper } from "@material-ui/core";
 import React, { useState, useEffect } from "react";
 import {
   LineChart,
@@ -43,7 +44,10 @@ export default function LineChartCovid({ data }) {
     }
   }, [data]);
   return (
-    <div>
+    <Paper
+      elevation={2}
+      style={{ margin: "auto", marginTop: "2%", width: "90%" }}
+    >
       <LineChart
         style={{ margin: "auto" }}
         width={700}
@@ -70,6 +74,6 @@ export default function LineChartCovid({ data }) {
         <Line type="monotone" dataKey="Total Deaths" stroke="#82ca9d" />
         <Line type="monotone" dataKey="Total Recovered" stroke="#52ca9d" />
       </LineChart>
-    </div>
+    </Paper>
   );
 }
