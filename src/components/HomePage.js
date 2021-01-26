@@ -6,6 +6,8 @@ import axios from "axios";
 import {
   AppBar,
   Button,
+  Card,
+  CardContent,
   IconButton,
   Table,
   TableBody,
@@ -21,6 +23,7 @@ import BarChartCovid from "./BarChartCovid";
 import LineChartCovid from "./LineChartCovid";
 import CovidCountryTable from "./CovidCountryTable";
 import firebase from "firebase";
+import Appbar from "./Appbar";
 
 function HomePage({ history }) {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -86,58 +89,56 @@ function HomePage({ history }) {
       console.log(error);
     }
   }, []);
-  const auth = firebase.auth();
-  const [user, setuser] = useState(auth.currentUser);
-  const googleProvider = new firebase.auth.GoogleAuthProvider();
-  const signInWithGoogle = () => {
-    auth
-      .signInWithPopup(googleProvider)
-      .then((res) => {
-        var userRef = db.collection("users").doc(res.user.email);
-        userRef.get().then(async (doc) => {
-          if (doc.exists) {
-            setuser(res.user);
-          } else {
-            auth.signOut();
-            // setuser(null);
-          }
-        });
-        console.log(res.user);
-      })
-      .catch((error) => {
-        console.log(error.message);
-      });
-  };
-  useEffect(() => {
-    setuser(auth.currentUser)
-  }, [auth.currentUser])
+  const [countryNews, setCountryNews] = useState([]);
 
-  // console.log(covidWorld.slice(covidWorld.length - 7, covidWorld.length))
+  useEffect(() => {
+    db.collection("userNews")
+      .where("country", "==", "worldwide")
+      .get()
+      .then(function (querySnapshot) {
+        let newNews = [];
+        querySnapshot.forEach(function (doc) {
+          // doc.data() is never undefined for query doc snapshots
+          newNews.push(doc.data());
+        });
+        setCountryNews(newNews);
+      })
+      .catch(function (error) {
+        console.log("Error getting documents: ", error);
+      });
+  }, []);
+
   return (
     <Fragment>
-      <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" style={{ flexGrow: 1 }}>
-            Welcome {user ? user.displayName : "To Our Website"}
-          </Typography>
-          {!user && (
-            <Button color="inherit" onClick={signInWithGoogle}>
-              Login
-            </Button>
-          )}
-          {user && (
-            <Button
-              color="inherit"
-              onClick={() => {
-                auth.signOut().then(()=>console.log('signed out'));
-                setuser(null);
-              }}
-            >
-              Signout
-            </Button>
-          )}
-        </Toolbar>
-      </AppBar>
+      <Appbar />
+      <div
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          height: "200px",
+          maxWidth: "100%",
+          overflow: "scroll",
+          margin:'1% 5%'
+        }}
+      >
+        {countryNews.length > 0 ? (
+          countryNews.map((el) => (
+            <Card style={{ margin: "1% " ,maxWidth:'200px', overflow:'scroll'}}>
+              <CardContent>
+                User: {el.user}
+                <br />
+                Date: {el.date}
+                <br />
+                Description: {el.description}
+              </CardContent>
+            </Card>
+          ))
+        ) : (
+          <Card style={{ margin: "1% ", maxWidth:'200px' }}>
+            <CardContent>No News!</CardContent>
+          </Card>
+        )}
+      </div>
       {Object.keys(covidSummary).includes("Global") && (
         <Fragment>
           <Summary data={covidSummary["Global"]} />

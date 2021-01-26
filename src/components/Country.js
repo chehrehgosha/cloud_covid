@@ -6,6 +6,8 @@ import axios from "axios";
 import {
   AppBar,
   Button,
+  Card,
+  CardContent,
   Table,
   TableBody,
   TableCell,
@@ -21,6 +23,7 @@ import BarChartCovid from "./BarChartCovid";
 import LineChartCovid from "./LineChartCovid";
 import CovidCountryTable from "./CovidCountryTable";
 import firebase from "firebase";
+import Appbar from "./Appbar";
 
 function Country({ location }) {
   const [loggedIn, setLoggedIn] = useState(false);
@@ -28,6 +31,7 @@ function Country({ location }) {
   const [covidWorld, setCovidWorld] = useState([]);
   const [lastSevenDays, setLastSevenDays] = useState({});
   const [lastThirtyDays, setLastThirtyDays] = useState({});
+  const [countryNews, setCountryNews] = useState([]);
   const history = useHistory();
   const db = firebase.firestore();
   var latestNewsRef = db.collection("news").doc(location.state);
@@ -47,6 +51,22 @@ function Country({ location }) {
       });
   };
 
+  useEffect(() => {
+    db.collection("userNews")
+      .where("country", "==", location.state)
+      .get()
+      .then(function (querySnapshot) {
+        let newNews = [];
+        querySnapshot.forEach(function (doc) {
+          // doc.data() is never undefined for query doc snapshots
+          newNews.push(doc.data());
+        });
+        setCountryNews(newNews);
+      })
+      .catch(function (error) {
+        console.log("Error getting documents: ", error);
+      });
+  }, []);
   useEffect(async () => {
     try {
       latestNewsRef.get().then(async (doc) => {
@@ -103,36 +123,42 @@ function Country({ location }) {
       });
   };
   useEffect(() => {
-    setuser(auth.currentUser)
-  }, [auth.currentUser])
+    setuser(auth.currentUser);
+  }, [auth.currentUser]);
   // console.log(lastThirtyDays);
   if (!location.state) history.push("/");
   else
     return (
       <Fragment>
-        <AppBar position="static">
-        <Toolbar>
-          <Typography variant="h6" style={{ flexGrow: 1 }}>
-            Welcome {user ? user.displayName : "To Our Website"}
-          </Typography>
-          {!user && (
-            <Button color="inherit" onClick={signInWithGoogle}>
-              Login
-            </Button>
+        <Appbar />
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            height: "200px",
+            maxWidth: "100%",
+            overflow: "scroll",
+            margin:'1% 5%'
+          }}
+        >
+          {countryNews.length > 0 ? (
+            countryNews.map((el) => (
+              <Card style={{ margin: "1%", maxWidth: "200px", overflow:'scroll' }}>
+                <CardContent>
+                  User: {el.user}
+                  <br />
+                  Date: {el.date}
+                  <br />
+                  Description: {el.description}
+                </CardContent>
+              </Card>
+            ))
+          ) : (
+            <Card style={{ margin: "1%", maxWidth: "200px" }}>
+              <CardContent>No News!</CardContent>
+            </Card>
           )}
-          {user && (
-            <Button
-              color="inherit"
-              onClick={() => {
-                auth.signOut().then(()=>console.log('signed out'));
-                setuser(null);
-              }}
-            >
-              Signout
-            </Button>
-          )}
-        </Toolbar>
-      </AppBar>
+        </div>
         {covidSummary && Object.keys(covidSummary).includes("Country") && (
           <Fragment>
             <Summary data={covidSummary} />
