@@ -1,72 +1,21 @@
 import React, { useState, useEffect, Fragment } from "react";
-import PropTypes from "prop-types";
-import Fab from "@material-ui/core/Fab";
-import { Redirect, withRouter } from "react-router-dom";
 import axios from "axios";
-import {
-  AppBar,
-  Button,
-  Card,
-  CardContent,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableRow,
-  Toolbar,
-  Typography,
-} from "@material-ui/core";
 import Summary from "./Summary";
 import { useHistory } from "react-router-dom";
 import PieChartCovid from "./PieChartCovid";
 import BarChartCovid from "./BarChartCovid";
 import LineChartCovid from "./LineChartCovid";
-import CovidCountryTable from "./CovidCountryTable";
 import firebase from "firebase";
-import Appbar from "./Appbar";
+import { updateDB } from "../actions/db";
+import NewsFeed from "./NewsFeed";
 
 function Country({ location }) {
-  const [loggedIn, setLoggedIn] = useState(false);
   const [covidSummary, setCovidSummary] = useState({});
-  const [covidWorld, setCovidWorld] = useState([]);
-  const [lastSevenDays, setLastSevenDays] = useState({});
   const [lastThirtyDays, setLastThirtyDays] = useState({});
-  const [countryNews, setCountryNews] = useState([]);
   const history = useHistory();
   const db = firebase.firestore();
   var latestNewsRef = db.collection("news").doc(location.state);
 
-  const updateDB = (data, date, doc) => {
-    db.collection("news")
-      .doc(doc)
-      .set({
-        content: data,
-        date: date,
-      })
-      .then(() => {
-        console.log("DB updated");
-      })
-      .catch((error) => {
-        console.log("error in updating DB");
-      });
-  };
-
-  useEffect(() => {
-    db.collection("userNews")
-      .where("country", "==", location.state)
-      .get()
-      .then(function (querySnapshot) {
-        let newNews = [];
-        querySnapshot.forEach(function (doc) {
-          // doc.data() is never undefined for query doc snapshots
-          newNews.push(doc.data());
-        });
-        setCountryNews(newNews);
-      })
-      .catch(function (error) {
-        console.log("Error getting documents: ", error);
-      });
-  }, []);
   useEffect(async () => {
     try {
       latestNewsRef.get().then(async (doc) => {
@@ -93,72 +42,15 @@ function Country({ location }) {
       });
 
       setCovidSummary(location.summary);
-
-      // const resWorld = await axios.get("https://api.covid19api.com/world");
-      // setCovidWorld(resWorld.data);
     } catch (error) {
       console.log(error);
     }
   }, []);
-  const auth = firebase.auth();
-  const [user, setuser] = useState(auth.currentUser);
-  const googleProvider = new firebase.auth.GoogleAuthProvider();
-  const signInWithGoogle = () => {
-    auth
-      .signInWithPopup(googleProvider)
-      .then((res) => {
-        var userRef = db.collection("users").doc(res.user.email);
-        userRef.get().then(async (doc) => {
-          if (doc.exists) {
-            setuser(res.user);
-          } else {
-            auth.signOut();
-            // setuser(null);
-          }
-        });
-        console.log(res.user);
-      })
-      .catch((error) => {
-        console.log(error.message);
-      });
-  };
-  useEffect(() => {
-    setuser(auth.currentUser);
-  }, [auth.currentUser]);
-  // console.log(lastThirtyDays);
   if (!location.state) history.push("/");
   else
     return (
       <Fragment>
-        <Appbar />
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            height: "200px",
-            maxWidth: "100%",
-            overflow: "scroll",
-            margin:'1% 5%'
-          }}
-        >
-          {countryNews.length > 0 ? (
-            countryNews.map((el) => (
-              <Card style={{ margin: "1%", maxWidth: "200px", overflow:'scroll' }}>
-                <CardContent>
-                  User: {el.user}
-                  <br />
-                  Date: {el.date}
-                  <br />
-                  Description: {el.description}
-                </CardContent>
-              </Card>
-            ))
-          ) : (
-            <Card style={{ margin: "1%", maxWidth: "200px" }}>
-              <CardContent>No News!</CardContent>
-            </Card>
-          )}
-        </div>
+        <NewsFeed country={location.state} />
         {covidSummary && Object.keys(covidSummary).includes("Country") && (
           <Fragment>
             <Summary data={covidSummary} />
@@ -171,12 +63,6 @@ function Country({ location }) {
             <LineChartCovid data={lastThirtyDays} />
           </Fragment>
         )}
-        {/*
-      {Object.keys(covidSummary).includes("Global") && (
-        <Fragment>
-          <CovidCountryTable data={covidSummary["Countries"]} />
-        </Fragment>
-      )}*/}
       </Fragment>
     );
 }

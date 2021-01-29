@@ -23,17 +23,11 @@ export default function Appbar() {
 
   const signInWithGoogle = () => {
     auth
-      .signInWithPopup(googleProvider)
+      .signInWithPopup(
+        googleProvider.setCustomParameters({ prompt: "select_account" })
+      )
       .then((res) => {
-        var userRef = db.collection("users").doc(res.user.email);
-        userRef.get().then(async (doc) => {
-          if (doc.exists) {
-            setuser(res.user);
-          } else {
-            auth.signOut();
-            // setuser(null);
-          }
-        });
+        setuser(res.user);
         console.log(res.user);
       })
       .catch((error) => {
@@ -59,28 +53,62 @@ export default function Appbar() {
   }, []);
   const [selectedCountry, setselectedCountry] = useState(null);
   const [description, setdescription] = useState(null);
-  const [date, setdate] = useState(null);
+  const [eligible, setEligible] = useState(null);
 
+  useEffect(() => {
+    if (user) {
+      db.collection("users")
+        .doc(user.email)
+        .get()
+        .then(async (doc) => {
+          if (doc.exists) {
+            setEligible(true);
+          } else setEligible(false);
+        });
+    }
+  }, [user]);
   const addNews = () => {
-    console.log(description);
-    console.log(selectedCountry);
-    console.log(new Date().toDateString());
-    console.log(auth.currentUser);
-    db.collection("userNews")
-      .doc()
-      .set({
-        description: description,
-        date: new Date().toDateString(),
-        user: auth.currentUser.displayName,
-        country: selectedCountry,
-      })
-      .then(() => {
-        console.log("News Added");
-      })
-      .catch((error) => {
-        console.log("error in adding news to DB");
-      });
+    var userRef = db.collection("users").doc(user.email);
+    userRef.get().then(async (doc) => {
+      if (doc.exists) {
+        db.collection("userNews")
+          .doc()
+          .set({
+            description: description,
+            date: new Date().toDateString(),
+            user: auth.currentUser.displayName,
+            country: selectedCountry,
+          })
+          .then(() => {
+            console.log("News Added");
+            window.location.reload();
+          })
+          .catch((error) => {
+            console.log("error in adding news to DB");
+          });
+      } else {
+        alert("You are not eligible to add News!");
+      }
+    });
+
     setdialog(false);
+  };
+
+  const makeEligible = () => {
+    var elig = window.confirm("You sure you are eligible?");
+    if (elig) {
+      db.collection("users")
+        .doc(user.email)
+        .set({
+          eligible: true,
+        })
+        .then(() => {
+          alert("You are eligible to add news!");
+        })
+        .catch((error) => {
+          console.log("error in making you eligible");
+        });
+    }
   };
   return (
     <Fragment>
@@ -143,6 +171,11 @@ export default function Appbar() {
               }}
             >
               Signout
+            </Button>
+          )}
+          {user && !eligible && (
+            <Button variant="contained" color="primary" onClick={makeEligible}>
+              Make me Eligible
             </Button>
           )}
         </Toolbar>

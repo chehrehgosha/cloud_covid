@@ -51,7 +51,7 @@ export default function LineChartCovid({ data }) {
       <LineChart
         style={{ margin: "auto" }}
         width={700}
-        height={700}
+        height={400}
         data={processedData}
         margin={{
           top: 5,

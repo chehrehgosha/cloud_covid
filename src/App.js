@@ -6,11 +6,12 @@ import { Route, Switch, BrowserRouter } from "react-router-dom";
 import HomePage from "./components/HomePage";
 import Country from "./components/Country";
 import { Paper } from "@material-ui/core";
+import Appbar from "./components/Appbar";
 
 function App() {
   const firebaseApp = firebase.apps[0];
   var storage = firebaseApp.storage();
-  
+
   const [png, setpng] = useState("");
   const [title, setTitle] = useState("initialState");
   var pathReference = storage.ref("");
@@ -57,17 +58,18 @@ function App() {
           style={{ height: "50px", margin: "10px 10px 10px -10px" }}
         />
       </div>
-      <Paper elevation={2} style={{padding:'1% 0', margin:'2% 15%',}}>
-      <BrowserRouter>
-        <Switch>
-          <Route exact path="/" render={(props) => <HomePage {...props} />} />
-          <Route
-            exact
-            path="/country"
-            render={(props) => <Country {...props} />}
-          />
-        </Switch>
-      </BrowserRouter>
+      <Paper elevation={2} style={{ padding: "1% 0", margin: "2% 15%" }}>
+        <BrowserRouter>
+          <Appbar />
+          <Switch>
+            <Route exact path="/" render={(props) => <HomePage {...props} />} />
+            <Route
+              exact
+              path="/country"
+              render={(props) => <Country {...props} />}
+            />
+          </Switch>
+        </BrowserRouter>
       </Paper>
     </div>
   );

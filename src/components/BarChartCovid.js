@@ -12,38 +12,43 @@ import {
 } from "recharts";
 
 export default function BarChartCovid({ data }) {
+  console.log("data", data);
   const [processedData, setProcessedData] = useState(null);
   useEffect(() => {
     if (Object.keys(data).length > 0) {
       // console.log(data);
-      const keys = Object.keys(data["cases"])
-        .slice(Math.max(Object.keys(data["cases"]).length - 7, 1))
-        .sort((a, b) => {
-          const datea = a.split("/");
-          const dateb = b.split("/");
-          if (datea[2] > dateb[2]) {
-            return 1;
-          } else if (datea[2] < dateb[2]) {
-            return -1;
-          } else {
+      const keys = Object.keys(data["cases"]).slice(
+        Math.max(Object.keys(data["cases"]).length - 7, 1)
+      );
+      keys.sort((a, b) => {
+        const datea = a.split("/");
+        const dateb = b.split("/");
+        if (datea[2] > dateb[2]) {
+          return 1;
+        } else if (datea[2] < dateb[2]) {
+          return -1;
+        } else {
+          if (datea[0] > dateb[0]) return 1;
+          else if (datea[0] < dateb[0]) return -1;
+          else {
             if (datea[1] > dateb[1]) return 1;
             else if (datea[1] < dateb[1]) return -1;
-            else {
-              if (datea[0] > dateb[0]) return 1;
-              else if (datea[0] < dateb[0]) return -1;
-              else return 1;
-            }
+            else return 1;
           }
-        });
-      const cases = Object.values(data["cases"])
-        .slice(Math.max(Object.values(data["cases"]).length - 7, 1))
-        .sort();
-      const deaths = Object.values(data["deaths"])
-        .slice(Math.max(Object.values(data["deaths"]).length - 7, 1))
-        .sort();
-      const recovered = Object.values(data["recovered"])
-        .slice(Math.max(Object.values(data["recovered"]).length - 7, 1))
-        .sort();
+        }
+      });
+      const cases = Object.values(data["cases"]).slice(
+        Math.max(Object.values(data["cases"]).length - 7, 1)
+      );
+      cases.sort();
+      const deaths = Object.values(data["deaths"]).slice(
+        Math.max(Object.values(data["deaths"]).length - 7, 1)
+      );
+      deaths.sort();
+      const recovered = Object.values(data["recovered"]).slice(
+        Math.max(Object.values(data["recovered"]).length - 7, 1)
+      );
+      recovered.sort();
       let newData = [];
       let obj = {};
       for (let index = 0; index < keys.length; index++) {
@@ -57,10 +62,11 @@ export default function BarChartCovid({ data }) {
         } else {
           obj = {
             name: keys[index],
-            "New Confirmed": cases[index] - cases[index - 1],
-            "New Deaths": deaths[index] - deaths[index - 1],
-            "New Recovered": recovered[index] - recovered[index - 1],
+            "New Confirmed": Math.max(cases[index] - cases[index - 1], 0),
+            "New Deaths": Math.max(deaths[index] - deaths[index - 1], 0),
+            "New Recovered": Math.max(recovered[index] - recovered[index - 1], 0),
           };
+          // console.log(cases[index] , cases[index - 1], index, cases.sort() );
           newData.push(obj);
         }
       }
